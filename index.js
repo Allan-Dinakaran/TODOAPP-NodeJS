@@ -6,6 +6,8 @@ const completed= require('./Routes/completed');
 const incomplete= require('./Routes/incomplete');
 
 const app = express();
+//Database connection
+connect_DB();
 
 //middlewares
 app.use(express.json());
@@ -13,9 +15,6 @@ app.use('/api/tasks/incomplete',incomplete);
 app.use('/api/tasks/completed',completed);
 app.use('/api/tasks',task);
 
-
-//Database connection
-connect_DB();
 
 //Server connection
 const PORT=process.env.PORT || 3000;
