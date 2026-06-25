@@ -19,6 +19,13 @@ router.get('/login', (req, res) => {
     });
 });
 
+router.get('/forgot-password', (req, res) => {
+    res.status(200).json({ 
+        message: "Forgot - Password?", 
+        instructions: "Send a POST request with 'email', and 'password' to create a new password." 
+    });
+});
+
 router.post('/register',async (req,res)=>{
     try{
         const username=req.body.username;
