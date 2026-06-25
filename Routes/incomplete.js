@@ -1,11 +1,12 @@
 const express= require('express');
 const task=require('../Database/schema');
+const userauth=require('../Middleware/token_auth');
 
 const router = express.Router();
 
-router.get('/',async(req,res)=>{
+router.get('/',userauth,async(req,res)=>{
     try{
-    incompletedtask=await task.find({Completed:false});
+    incompletedtask=await task.find({Completed:false,user: req.user.id});
 
     res.status(200).json(incompletedtask);
     }

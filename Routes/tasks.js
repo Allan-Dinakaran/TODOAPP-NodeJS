@@ -1,11 +1,12 @@
 const express = require('express');
-const task = require('../Database/schema')
+const task = require('../Database/schema');
+const userauth=require('../Middleware/token_auth');
 
 const router = express.Router();
 
-router.get('/',async (req,res)=>{
+router.get('/',userauth,async (req,res)=>{
   try{
-    const allTask=await task.find();
+    const allTask=await task.find({ user: req.user.id });
     res.status(200).json(allTask);
   }
   catch(error){
@@ -13,9 +14,9 @@ router.get('/',async (req,res)=>{
   }
 });
 
-router.get('/:id',async (req,res)=>{
+router.get('/:id',userauth,async (req,res)=>{
   try{
-    const specifictask=await task.find({taskid:req.params.id});
+    const specifictask=await task.findOne({ taskid: req.params.id, user: req.user.id });
     if (specifictask.length===0) return res.status(404).send("No task created");
     
     res.status(200).json(specifictask);
@@ -25,11 +26,16 @@ router.get('/:id',async (req,res)=>{
   }
 });
 
-router.post('/',async (req,res)=>{
-    try{
-      const totaltask= await task.countDocuments();
+router.post('/',userauth,async (req,res)=>{
+      try {
+      const highestTask = await task.findOne({ user: req.user.id }).sort({ taskid: -1 });
+      const nextId = highestTask && highestTask.taskid ? highestTask.taskid + 1 : 1;
 
-      const taskdata={...req.body,taskid:totaltask +1 };
+      const taskdata = { 
+          ...req.body, 
+          taskid: nextId,
+          user: req.user.id
+      };
       const newtask= await task.create(taskdata);
       res.status(201).json(newtask);
     }
@@ -40,9 +46,12 @@ router.post('/',async (req,res)=>{
 
 
 
-router.put('/:id',async(req,res)=>{
+
+router.put('/:id',userauth,async(req,res)=>{
   try{
-    const uptask = await task.findOneAndUpdate({taskid:req.params.id},{$set:req.body},{new:true,runValidators:true});
+    const uptask = await task.findOneAndUpdate({ taskid: req.params.id, user: req.user.id },
+      { $set: req.body },
+      { new: true, runValidators: true});
 
     if(!uptask) return res.status(404).send("Task not found");
 
@@ -53,9 +62,9 @@ router.put('/:id',async(req,res)=>{
   }
 });
 
-router.delete('/:id', async(req,res)=>{
+router.delete('/:id',userauth, async(req,res)=>{
   try{
-    deltask=await task.findOneAndDelete({taskid:req.params.id});
+    deltask=await task.findOneAndDelete({ taskid: req.params.id, user: req.user.id });
 
     if(!deltask) return res.status(404).send("Task not found");
 
