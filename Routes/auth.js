@@ -62,7 +62,7 @@ router.post('/login',async(req,res)=>{
 
         const token=jwt.sign(
             { id: foundUser._id},
-            config.get('jwtSecret'),
+            process.env.JWT_SECRET || "temporary_development_secret_key",
             { expiresIn: '2h' });
 
         res.status(200).json({
