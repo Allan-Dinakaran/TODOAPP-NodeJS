@@ -75,4 +75,25 @@ router.post('/login',async(req,res)=>{
     }
 });
 
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const foundUser = await user.findOne({ email });
+    if (!foundUser) {
+      return res.status(404).json({ message: "No account with that email exists." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    foundUser.password = await bcrypt.hash(password, salt);
+
+    await foundUser.save();
+
+    res.status(200).json({ message: "Password updated successfully! Go ahead and log in." });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports=router;
