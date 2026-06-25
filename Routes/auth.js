@@ -5,6 +5,20 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const user = require('../Database/user');
 
+router.get('/register', (req, res) => {
+    res.status(200).json({ 
+        message: "Registration Endpoint Active.", 
+        instructions: "Send a POST request with 'username', 'email', and 'password' to create an account." 
+    });
+});
+
+router.get('/login', (req, res) => {
+    res.status(200).json({ 
+        message: "Login Endpoint Active.", 
+        instructions: "Send a POST request with your credentials to receive your JWT access token." 
+    });
+});
+
 router.post('/register',async (req,res)=>{
     try{
         const username=req.body.username;
