@@ -1,26 +1,31 @@
-const mongoose= require('mongoose');
+const mongoose = require('mongoose');
 
 const todo_schema = mongoose.Schema({
-    taskid:{
+    taskid: {
         type: Number,
     },
-    taskname:{
+    taskname: {
         type: String,
         required: [true, 'A name is required for the task'],
         minlength: 3
     },
-    Description:{
+    Description: {
         type: String,
-        required:[true,'Give a description of the task you are about to do'],
+        required: [true, 'Give a description of the task you are about to do'],
         minlength: 5
     },
-    Completed:{
+    Completed: {
         type: Boolean,
         default: false
     },
-    CreatedOn:{
-        type:Date,
-        default:Date.now()
+    CreatedOn: {
+        type: Date,
+        default: Date.now // 💡 Note: Removed () so it generates the date when created, not when the server starts!
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
     }
 });
 
