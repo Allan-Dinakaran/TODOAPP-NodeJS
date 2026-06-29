@@ -4,7 +4,7 @@ const User = require('../Database/user');
 const task = require('../Database/schema');
 const mongoose = require('mongoose');
 
-const target_time = '55 23 * * *';
+const target_time = '53 22 * * *';
 
 cron.schedule(target_time, async () => {
   console.log("Starting Check");
