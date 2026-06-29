@@ -26,7 +26,9 @@ const todo_schema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         required: true
-    }
+    },
+    fileUrl: { type: String },
+    filePublicId: { type: String }
 });
 
 const todo_model=mongoose.model('Tasks', todo_schema);
