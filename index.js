@@ -11,6 +11,9 @@ const app = express();
 //Database connection
 connect_DB();
 
+//Mailing - cron
+require('./Mailing/timecheck');
+
 //middlewares
 app.use(express.json());
 app.use('/api/auth',auth);
