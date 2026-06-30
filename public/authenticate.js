@@ -65,12 +65,12 @@ async function loadTasks(token) {
         }
 
         listContainer.innerHTML = tasks.map(task => `
-            <div class="task-card" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 6px solid ${task.isCompleted ? '#10b981' : '#4f46e5'}; position: relative;">
+            <div class="task-card" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 6px solid ${task.Completed ? '#10b981' : '#4f46e5'}; position: relative;">
                 
                 <div style="flex: 1; padding-right: 15px;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                        <input type="checkbox" ${task.isCompleted ? 'checked' : ''} onchange="toggleTaskStatus(${task.taskid}, this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
-                        <h3 style="margin: 0; color: #1f2937; ${task.isCompleted ? 'text-decoration: line-through; color: #9ca3af;' : ''}">${task.taskname || 'Untitled'}</h3>
+                        <input type="checkbox" ${task.Completed ? 'checked' : ''} onchange="toggleTaskStatus(${task.taskid}, this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
+                        <h3 style="margin: 0; color: #1f2937; ${task.Completed ? 'text-decoration: line-through; color: #9ca3af;' : ''}">${task.taskname || 'Untitled'}</h3>
                     </div>
                     <p style="margin: 0; color: #4b5563; font-size: 14px; word-break: break-word;">${task.Description || 'No description provided'}</p>
                     
@@ -96,7 +96,6 @@ async function loadTasks(token) {
     }
 }
 
-// 4. Update Task Status Checkbox Method
 async function toggleTaskStatus(taskId, statusValue) {
     const token = localStorage.getItem('userToken');
     try {
@@ -106,6 +105,7 @@ async function toggleTaskStatus(taskId, statusValue) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
+            // 🟢 FIXED: Sends 'isCompleted' payload property matching the backend routing handler expectation
             body: JSON.stringify({ isCompleted: statusValue }) 
         });
 
@@ -117,7 +117,6 @@ async function toggleTaskStatus(taskId, statusValue) {
     }
 }
 
-// --- Forms Event Listeners Handling Matrix ---
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -234,6 +233,5 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     checkSession();
 });
 
-// Boot Configuration Initializers
 document.addEventListener('DOMContentLoaded', setupFilterListener);
 checkSession();
