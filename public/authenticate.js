@@ -32,8 +32,8 @@ async function loadTasks(token) {
 
         listContainer.innerHTML = tasks.map(task => `
     <div class="task-card">
-        <h3>${task.title || 'Untitled'}</h3>
-        <p>${task.description || 'No description provided'}</p>
+        <h3>${task.taskname || 'Untitled'}</h3>
+        <p>${task.Description || 'No description provided'}</p>
         
         ${task.fileUrl ? `
             <div style="margin-top: 10px;">
