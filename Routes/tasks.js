@@ -6,27 +6,43 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 
 const upload = multer({ storage: storage });
-
 const router = express.Router();
 
 router.get('/', userauth, async (req, res) => {
   try {
     const allTask = await task.find({ user: req.user.id });
     res.status(200).json(allTask);
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
+router.get('/completed', userauth, async (req, res) => {
+  try {
+    const completedTasks = await task.find({ user: req.user.id, isCompleted: true });
+    res.status(200).json(completedTasks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/incompleted', userauth, async (req, res) => {
+  try {
+    const incompleteTasks = await task.find({ user: req.user.id, isCompleted: { $ne: true } });
+    res.status(200).json(incompleteTasks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ⚠️ 4. CRITICAL: Generic ID route goes BELOW specific endpoints
 router.get('/:id', userauth, async (req, res) => {
   try {
     const specifictask = await task.findOne({ taskid: req.params.id, user: req.user.id });
     if (!specifictask) return res.status(404).send("No task created");
     
     res.status(200).json(specifictask);
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -58,13 +74,13 @@ router.post('/', userauth, (req, res, next) => {
         taskid: nextId,
         user: req.user.id,
         fileUrl: fileUrl,
-        filePublicId: filePublicId
+        filePublicId: filePublicId,
+        isCompleted: false
     };
 
     const newtask = await task.create(taskdata);
     res.status(201).json(newtask);
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Backend Task Creation Failure:", error.message);
     res.status(400).json({ message: error.message });
   }
@@ -97,7 +113,6 @@ router.put('/:id', userauth, upload.single('attachment'), async (req, res) => {
   }
 });
 
-
 router.delete('/:id', userauth, async (req, res) => {
   try {
     const targetTask = await task.findOne({ taskid: req.params.id, user: req.user.id });
@@ -109,8 +124,7 @@ router.delete('/:id', userauth, async (req, res) => {
 
     const deltask = await task.findOneAndDelete({ taskid: req.params.id, user: req.user.id });
     res.status(200).json({ message: "Task deleted successfully", deltask });
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
