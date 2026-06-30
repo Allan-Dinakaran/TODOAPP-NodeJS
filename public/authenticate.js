@@ -31,12 +31,21 @@ async function loadTasks(token) {
         }
 
         listContainer.innerHTML = tasks.map(task => `
-            <div class="task-card">
-                <h3>${task.title || 'Untitled'}</h3>
-                <p>${task.description || 'No description provided'}</p>
-                <button class="delete-btn" onclick="deleteTask(${task.taskid})">Delete</button>
+    <div class="task-card">
+        <h3>${task.title || 'Untitled'}</h3>
+        <p>${task.description || 'No description provided'}</p>
+        
+        ${task.fileUrl ? `
+            <div style="margin-top: 10px;">
+                <a href="${task.fileUrl}" target="_blank" style="color: #4f46e5; text-decoration: underline; font-size: 13px; font-weight: bold;">
+                    📎 View Attachment
+                </a>
             </div>
-        `).join('');
+        ` : ''}
+        
+        <button class="delete-btn" onclick="deleteTask(${task.taskid})">Delete</button>
+    </div>
+`).join('');
     } catch (err) {
         console.error(err);
         listContainer.innerHTML = `<p style='color: #ef4444;'>Sync error: ${err.message}</p>`;
@@ -95,8 +104,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 document.getElementById('taskForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('userToken');
-    const title = document.getElementById('taskTitle').value;
-    const description = document.getElementById('taskDesc').value;
+    
+    // 🟢 PASS THE FORM ELEMENT DIRECTLY: This forces the browser to handle multipart correctly
+    const formElement = document.getElementById('taskForm');
+    const formData = new FormData(formElement);
 
     try {
         const response = await fetch(`${BASE_URL}/tasks`, {
@@ -104,15 +115,19 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
             headers: { 
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ title, description })
+            body: formData 
         });
 
         if (response.ok) {
-            document.getElementById('taskForm').reset();
+            formElement.reset();
             loadTasks(token);
+        } else {
+            const data = await response.json();
+            alert(`Could not save task: ${data.message || 'Server rejected request'}`);
         }
     } catch (err) {
-        console.error(err);
+        console.error("Task creation network error:", err);
+        alert("Network error: Failed to connect to server.");
     }
 });
 
