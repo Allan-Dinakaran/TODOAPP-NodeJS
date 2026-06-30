@@ -102,7 +102,6 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
         const response = await fetch(`${BASE_URL}/tasks`, {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ title, description })
