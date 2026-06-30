@@ -1,6 +1,10 @@
 const cloudinary = require('cloudinary').v2;
-// 🟢 FIXED: Added curly braces to destructure CloudinaryStorage correctly
-const { CloudinaryStorage } = require('multer-storage-cloudinary'); 
+const multerStorageCloudinary = require('multer-storage-cloudinary');
+
+// 🟢 Fallback check: Extract it if it's nested inside an object, otherwise use it directly
+const CloudinaryStorage = multerStorageCloudinary.CloudinaryStorage 
+  ? multerStorageCloudinary.CloudinaryStorage 
+  : multerStorageCloudinary;
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
