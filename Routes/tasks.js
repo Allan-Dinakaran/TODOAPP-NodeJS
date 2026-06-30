@@ -27,13 +27,19 @@ router.get('/:id', userauth, async (req, res) => {
   }
 });
 
-// POST: Save a new authenticated task safely
-router.post('/', userauth, upload.single('attachment'), async (req, res) => {
+router.post('/', userauth, (req, res, next) => {
+  upload.single('attachment')(req, res, function (err) {
+    if (err) {
+      console.error("Multer/Cloudinary Error:", err.message);
+      return res.status(400).json({ message: `File upload initialization failed: ${err.message}` });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     const highestTask = await task.findOne({ user: req.user.id }).sort({ taskid: -1 });
     const nextId = highestTask && highestTask.taskid ? highestTask.taskid + 1 : 1;
 
-    // 🟢 Stabilized File Parsing Block
     let fileUrl = null;
     let filePublicId = null;
 
@@ -44,7 +50,7 @@ router.post('/', userauth, upload.single('attachment'), async (req, res) => {
 
     const taskdata = { 
         taskname: req.body.taskname,
-        Description: req.body.Description, 
+        Description: req.body.Description,
         taskid: nextId,
         user: req.user.id,
         fileUrl: fileUrl,
