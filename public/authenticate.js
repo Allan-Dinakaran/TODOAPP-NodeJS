@@ -109,11 +109,26 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     }
 });
 
+const fileInput = document.getElementById('taskFile');
+const clearBtn = document.getElementById('clearFileBtn');
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        clearBtn.style.display = 'inline-block';
+    } else {
+        clearBtn.style.display = 'none';
+    }
+});
+
+clearBtn.addEventListener('click', () => {
+    fileInput.value = "";
+    clearBtn.style.display = 'none';
+});
+
 document.getElementById('taskForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('userToken');
     
-    // 🟢 PASS THE FORM ELEMENT DIRECTLY: This forces the browser to handle multipart correctly
     const formElement = document.getElementById('taskForm');
     const formData = new FormData(formElement);
 
@@ -128,8 +143,10 @@ document.getElementById('taskForm').addEventListener('submit', async (e) => {
 
         if (response.ok) {
             formElement.reset();
-            loadTasks(token);
-        } else {
+            document.getElementById('clearFileBtn').style.display = 'none'; // 🟢 Hide button after save
+            loadTasks(token); 
+}
+        else {
             const data = await response.json();
             alert(`Could not save task: ${data.message || 'Server rejected request'}`);
         }
