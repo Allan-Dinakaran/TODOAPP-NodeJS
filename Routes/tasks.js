@@ -1,7 +1,7 @@
 const express = require('express');
 const task = require('../Database/schema');
 const userauth = require('../Middleware/token_auth');
-const { upload, cloudinary } = require('../config/cloudinary');
+const { upload, cloudinary } = require('../Config/cloudinary');
 
 const router = express.Router();
 
