@@ -31,19 +31,27 @@ async function loadTasks(token) {
         }
 
         listContainer.innerHTML = tasks.map(task => `
-    <div class="task-card">
-        <h3>${task.taskname || 'Untitled'}</h3>
-        <p>${task.Description || 'No description provided'}</p>
+    <div class="task-card" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 6px solid #4f46e5; position: relative;">
         
-        ${task.fileUrl ? `
-            <div style="margin-top: 10px;">
-                <a href="${task.fileUrl}" target="_blank" style="color: #4f46e5; text-decoration: underline; font-size: 13px; font-weight: bold;">
-                    📎 View Attachment
-                </a>
-            </div>
-        ` : ''}
-        
-        <button class="delete-btn" onclick="deleteTask(${task.taskid})">Delete</button>
+        <div style="flex: 1; padding-right: 15px;">
+            <h3 style="margin: 0 0 8px 0; color: #1f2937;">${task.taskname || 'Untitled'}</h3>
+            <p style="margin: 0; color: #4b5563; font-size: 14px; word-break: break-word;">${task.Description || 'No description provided'}</p>
+            
+            ${task.fileUrl ? `
+                <div style="margin-top: 12px;">
+                    <a href="${task.fileUrl}" target="_blank" style="color: #4f46e5; text-decoration: underline; font-size: 13px; font-weight: bold;">
+                        📎 View Attachment
+                    </a>
+                </div>
+            ` : ''}
+        </div>
+
+        <div>
+            <button class="delete-btn" onclick="deleteTask(${task.taskid})" style="background: #ef4444; color: white; padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background 0.2s;">
+                Delete
+            </button>
+        </div>
+
     </div>
 `).join('');
     } catch (err) {
