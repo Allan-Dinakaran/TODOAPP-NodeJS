@@ -15,10 +15,9 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const fileEditWarning = document.getElementById('fileEditWarning');
 
 const getHeaders = () => ({
-  'Authorization': AUTH_TOKEN
+  'Authorization': `Bearer ${AUTH_TOKEN}`
 });
 
-// 🔍 READ: Load Tasks
 async function loadTasks() {
   try {
     const res = await fetch(API_BASE_URL, { headers: getHeaders() });
@@ -57,7 +56,6 @@ async function loadTasks() {
   }
 }
 
-// ➕ CREATE / 🔄 UPDATE
 taskForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -99,7 +97,6 @@ taskForm.addEventListener('submit', async (e) => {
   }
 });
 
-// ❌ DELETE
 async function deleteTask(id) {
   if (!confirm("Delete this task?")) return;
   try {
