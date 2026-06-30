@@ -1,4 +1,3 @@
-
 const API_BASE_URL = "https://todoapp-nodejs-kfue.onrender.com/api/tasks"; 
 
 async function loadTasks() {
@@ -40,5 +39,32 @@ async function loadTasks() {
         listContainer.innerHTML = "<p style='color: #ef4444;'>Failed to sync dashboard items from the server.</p>";
     }
 }
+
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const title = document.getElementById('regUsername').value;
+    const description = document.getElementById('regEmail').value;
+
+    try {
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description })
+        });
+
+        if (response.ok) {
+            document.getElementById('registerForm').reset();
+            loadTasks(); 
+        } else {
+            const data = await response.json();
+            alert(`Error: ${data.message || data.error || 'Could not save task'}`);
+        }
+    } catch (err) {
+        console.error("Task submission network error:", err);
+        alert("Network error: Could not reach the server.");
+    }
+});
+
 
 loadTasks();
