@@ -19,7 +19,7 @@ router.get('/', userauth, async (req, res) => {
 
 router.get('/completed', userauth, async (req, res) => {
   try {
-    const completedTasks = await task.find({ user: req.user.id, isCompleted: true });
+    const completedTasks = await task.find({ user: req.user.id, Completed: true });
     res.status(200).json(completedTasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -28,22 +28,44 @@ router.get('/completed', userauth, async (req, res) => {
 
 router.get('/incompleted', userauth, async (req, res) => {
   try {
-    const incompleteTasks = await task.find({ user: req.user.id, isCompleted: { $ne: true } });
+    const incompleteTasks = await task.find({ user: req.user.id, Completed: { $ne: true } });
     res.status(200).json(incompleteTasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// ⚠️ 4. CRITICAL: Generic ID route goes BELOW specific endpoints
-router.get('/:id', userauth, async (req, res) => {
+router.put('/:id', userauth, upload.single('attachment'), async (req, res) => {
   try {
-    const specifictask = await task.findOne({ taskid: req.params.id, user: req.user.id });
-    if (!specifictask) return res.status(404).send("No task created");
+    let existingTask = await task.findOne({ taskid: req.params.id, user: req.user.id });
+    if (!existingTask) return res.status(404).send("Task not found");
+
+    let updateData = {};
+
+    if (req.body.isCompleted !== undefined) {
+      updateData.Completed = req.body.isCompleted === true || req.body.isCompleted === 'true';
+    }
     
-    res.status(200).json(specifictask);
+    if (req.body.taskname) updateData.taskname = req.body.taskname;
+    if (req.body.Description) updateData.Description = req.body.Description;
+
+    if (req.file) {
+      if (existingTask.filePublicId) {
+        await cloudinary.uploader.destroy(existingTask.filePublicId);
+      }
+      updateData.fileUrl = req.file.path;
+      updateData.filePublicId = req.file.filename;
+    }
+
+    const uptask = await task.findOneAndUpdate(
+      { taskid: req.params.id, user: req.user.id },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({ message: "Task updated successfully", uptask });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
