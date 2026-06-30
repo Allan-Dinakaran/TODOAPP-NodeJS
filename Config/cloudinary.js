@@ -1,5 +1,5 @@
 const { v2: cloudinary } = require('cloudinary');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary'); 
 const multer = require('multer');
 
 cloudinary.config({
@@ -13,7 +13,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'todo_attachments',
     allowed_formats: ['jpg', 'png', 'jpeg', 'pdf', 'docx', 'txt'],
-    resource_type: 'auto'
+    resource_type: 'auto' 
   }
 });
 
