@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud Task Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Cloud Task Manager</h1>
+    
+    <form id="taskForm">
+      <input type="hidden" id="editTaskId">
+      
+      <div class="form-group">
+        <label for="title">Task Title</label>
+        <input type="text" id="title" placeholder="What needs to be done?" required>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" placeholder="Add some details..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="attachment">Attach Photo / File</label>
+        <input type="file" id="attachment" accept="image/*,.pdf,.docx,.txt">
+        <div id="fileEditWarning" class="warning-text" style="display: none;">💡 Selecting a new file will replace the current attachment.</div>
+      </div>
+
+      <button type="submit" id="submitBtn">Create Task</button>
+      <button type="button" id="cancelEditBtn" style="display: none;">Cancel Edit</button>
+    </form>
+
+    <hr>
+
+    <h2>Your Tasks</h2>
+    <div id="tasksContainer" class="tasks-grid">
+      <p class="loading">Loading tasks...</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -20,7 +20,7 @@ const todo_schema = mongoose.Schema({
     },
     CreatedOn: {
         type: Date,
-        default: Date.now // 💡 Note: Removed () so it generates the date when created, not when the server starts!
+        default: Date.now
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,

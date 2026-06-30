@@ -1,6 +1,7 @@
 const express = require ('express');
 const mongoose = require('mongoose');
 const config = require('config');
+const path = require('path');
 const connect_DB = require('./Database/db');
 const task= require('./Routes/tasks');
 const completed= require('./Routes/completed');
@@ -8,6 +9,8 @@ const incomplete= require('./Routes/incomplete');
 const auth=require('./Routes/auth');
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, 'public')));
 //Database connection
 connect_DB();
 
