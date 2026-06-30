@@ -86,7 +86,7 @@ router.post('/forgot-password', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const foundUser = await user.findOne({ email });
+    const foundUser = await user.findOne({ username: username });
     if (!foundUser) {
       return res.status(404).json({ message: "No account with that email exists." });
     }

@@ -12,7 +12,7 @@ module.exports = function (req, res, next) {
         const cleantoken= token.startsWith("Bearer ") ? token.split(" ")[1] : token;
         const verify=jwt.verify(cleantoken,process.env.JWT_SECRET || "temporary_development_secret_key");
 
-        req.user=verify;
+        req.user = { id: verify.id };
 
         next();
     }
