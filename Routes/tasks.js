@@ -2,8 +2,7 @@ const express = require('express');
 const task = require('../Database/schema');
 const userauth = require('../Middleware/token_auth');
 const storage = require('../Config/cloudinary');
-const userauth = require('../Middleware/token_auth');
-const task = require('../Database/schema');
+const multer = require('multer');
 
 const upload = multer({ storage: storage });
 
