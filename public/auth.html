@@ -1,101 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Authentication - Cloud Task Manager</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .auth-container { max-width: 400px; margin: 100px auto; }
-    .toggle-link { text-align: center; margin-top: 15px; cursor: pointer; color: var(--primary); font-size: 14px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Task Manager - Live View</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 50px; background: #f3f4f6; }
+        .container { display: flex; gap: 50px; justify-content: center; width: 100%; max-width: 800px; }
+        .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; height: fit-content; }
+        input, textarea { width: 100%; margin: 10px 0; padding: 8px; box-sizing: border-box; font-family: sans-serif; border: 1px solid #d1d5db; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #4338ca; }
+        
+        .task-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 6px solid #4f46e5; }
+        .task-card h3 { margin: 0 0 8px 0; color: #1f2937; }
+        .task-card p { margin: 0; color: #4b5563; font-size: 14px; line-height: 1.5; }
+        #tasksContainer { width: 100%; max-width: 400px; }
+        .section-title { font-size: 22px; color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; }
+    </style>
 </head>
 <body>
-  <div class="container auth-container">
-    <h2 id="authTitle">🔐 Account Login</h2>
-    
-    <form id="authForm">
-      <div class="form-group" id="usernameGroup" style="display: none;">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Choose a username">
-      </div>
 
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" placeholder="Enter your email" required>
-      </div>
+    <div class="container">
+        <div class="form-box">
+            <h2>Add New Task</h2>
+            <form id="registerForm">
+                <input type="text" id="regUsername" placeholder="Task Title" required>
+                <textarea id="regEmail" placeholder="Task Description" rows="4" required></textarea>
+                <button type="submit">Create Task</button>
+            </form>
+        </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required>
-      </div>
+        <div id="tasksContainer">
+            <h2 class="section-title">Active Dashboard Items</h2>
+            <div id="liveList">Loading tasks directly from cluster...</div>
+        </div>
+    </div>
 
-      <button type="submit" id="authBtn">Login</button>
-      <div id="toggleAuth" class="toggle-link">Don't have an account? Register here</div>
-    </form>
-  </div>
-
-  <script>
-    let isLoginMode = true;
-    const authForm = document.getElementById('authForm');
-    const usernameGroup = document.getElementById('usernameGroup');
-    const authTitle = document.getElementById('authTitle');
-    const authBtn = document.getElementById('authBtn');
-    const toggleAuth = document.getElementById('toggleAuth');
-
-    // Switch between Login and Registration visual modes
-    toggleAuth.addEventListener('click', () => {
-      isLoginMode = !isLoginMode;
-      if (isLoginMode) {
-        authTitle.innerText = "🔐 Account Login";
-        authBtn.innerText = "Login";
-        usernameGroup.style.display = "none";
-        document.getElementById('username').required = false;
-        toggleAuth.innerText = "Don't have an account? Register here";
-      } else {
-        authTitle.innerText = "📝 Create Account";
-        authBtn.innerText = "Register";
-        usernameGroup.style.display = "block";
-        document.getElementById('username').required = true;
-        toggleAuth.innerText = "Already have an account? Login here";
-      }
-    });
-
-    authForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const username = document.getElementById('username').value;
-
-      const endpoint = isLoginMode ? '/auth/login' : '/auth/register';
-      
-      const payload = isLoginMode 
-        ? { username: username || email, password } 
-        : { username, email, password };
-
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || data.message || "Authentication failed");
-
-        if (isLoginMode) {
-          localStorage.setItem('token', data.token);
-          alert("Login successful!");
-          window.location.href = '/'
-        } else {
-          alert("Registration successful! Switching to login...");
-          toggleAuth.click();
-        }
-      } catch (err) {
-        alert(err.message);
-      }
-    });
-  </script>
+    <script src="authenticate.js"></script>
 </body>
 </html>
