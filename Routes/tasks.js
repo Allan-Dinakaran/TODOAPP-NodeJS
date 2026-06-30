@@ -27,22 +27,35 @@ router.get('/:id', userauth, async (req, res) => {
   }
 });
 
+// POST: Save a new authenticated task safely
 router.post('/', userauth, upload.single('attachment'), async (req, res) => {
   try {
     const highestTask = await task.findOne({ user: req.user.id }).sort({ taskid: -1 });
     const nextId = highestTask && highestTask.taskid ? highestTask.taskid + 1 : 1;
 
+    // 🟢 Stabilized File Parsing Block
+    let fileUrl = null;
+    let filePublicId = null;
+
+    if (req.file) {
+      fileUrl = req.file.path || req.file.url || null;
+      filePublicId = req.file.filename || req.file.public_id || null;
+    }
+
     const taskdata = { 
-        ...req.body, 
+        taskname: req.body.taskname,
+        Description: req.body.Description, 
         taskid: nextId,
         user: req.user.id,
-        fileUrl: req.file ? req.file.path : null,
-        filePublicId: req.file ? req.file.filename : null
+        fileUrl: fileUrl,
+        filePublicId: filePublicId
     };
+
     const newtask = await task.create(taskdata);
     res.status(201).json(newtask);
   }
   catch (error) {
+    console.error("Backend Task Creation Failure:", error.message);
     res.status(400).json({ message: error.message });
   }
 });
