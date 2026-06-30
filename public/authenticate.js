@@ -6,6 +6,7 @@ function checkSession() {
         document.getElementById('authViews').style.display = 'none';
         document.getElementById('navBar').style.display = 'flex';
         document.getElementById('dashboardView').style.display = 'flex';
+        displayUserHeader(token);
         loadTasks(token);
     } else {
         document.getElementById('authViews').style.display = 'flex';
@@ -14,51 +15,109 @@ function checkSession() {
     }
 }
 
-async function loadTasks(token) {
-    const listContainer = document.getElementById('liveList');
+function displayUserHeader(token) {
+    if (!token) return;
     try {
-        const response = await fetch(`${BASE_URL}/tasks`, {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const username = payload.username || payload.name || "User";
+        
+        const welcomeMsg = document.getElementById('welcomeMsg');
+        if (welcomeMsg) {
+            welcomeMsg.textContent = `Welcome, ${username}`;
+        }
+    } catch (e) {
+        console.error("Error reading username payload from token:", e);
+    }
+}
+
+function setupFilterListener() {
+    const filterSelect = document.getElementById('taskStatusFilter');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', () => {
+            const token = localStorage.getItem('userToken');
+            loadTasks(token);
+        });
+    }
+}
+
+async function loadTasks(token) {
+    if (!token) return;
+    const listContainer = document.getElementById('liveList');
+    const filterSelect = document.getElementById('taskStatusFilter');
+    const filterValue = filterSelect ? filterSelect.value : 'all';
+    
+    let url = `${BASE_URL}/tasks`;
+    if (filterValue === 'completed') url = `${BASE_URL}/tasks/completed`;
+    if (filterValue === 'incomplete') url = `${BASE_URL}/tasks/incompleted`;
+
+    try {
+        const response = await fetch(url, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const tasks = await response.json();
 
-        if (!response.ok) throw new Error(tasks.message || "Failed to fetch");
+        if (!response.ok) throw new Error(tasks.message || "Failed to fetch files");
 
         if (tasks.length === 0) {
-            listContainer.innerHTML = "<p style='color: #6b7280;'>Your dashboard is clear!</p>";
+            listContainer.innerHTML = "<p style='color: #6b7280; font-style: italic;'>Your dashboard is clear!</p>";
             return;
         }
 
         listContainer.innerHTML = tasks.map(task => `
-    <div class="task-card" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 6px solid #4f46e5; position: relative;">
-        
-        <div style="flex: 1; padding-right: 15px;">
-            <h3 style="margin: 0 0 8px 0; color: #1f2937;">${task.taskname || 'Untitled'}</h3>
-            <p style="margin: 0; color: #4b5563; font-size: 14px; word-break: break-word;">${task.Description || 'No description provided'}</p>
-            
-            ${task.fileUrl ? `
-                <div style="margin-top: 12px;">
-                    <a href="${task.fileUrl}" target="_blank" style="color: #4f46e5; text-decoration: underline; font-size: 13px; font-weight: bold;">
-                        📎 View Attachment
-                    </a>
+            <div class="task-card" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 6px solid ${task.isCompleted ? '#10b981' : '#4f46e5'}; position: relative;">
+                
+                <div style="flex: 1; padding-right: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <input type="checkbox" ${task.isCompleted ? 'checked' : ''} onchange="toggleTaskStatus(${task.taskid}, this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
+                        <h3 style="margin: 0; color: #1f2937; ${task.isCompleted ? 'text-decoration: line-through; color: #9ca3af;' : ''}">${task.taskname || 'Untitled'}</h3>
+                    </div>
+                    <p style="margin: 0; color: #4b5563; font-size: 14px; word-break: break-word;">${task.Description || 'No description provided'}</p>
+                    
+                    ${task.fileUrl ? `
+                        <div style="margin-top: 12px;">
+                            <a href="${task.fileUrl}" target="_blank" style="color: #4f46e5; text-decoration: underline; font-size: 13px; font-weight: bold;">
+                                📎 View Attachment
+                            </a>
+                        </div>
+                    ` : ''}
                 </div>
-            ` : ''}
-        </div>
 
-        <div>
-            <button class="delete-btn" onclick="deleteTask(${task.taskid})" style="background: #ef4444; color: white; padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background 0.2s;">
-                Delete
-            </button>
-        </div>
-
-    </div>
-`).join('');
+                <div>
+                    <button class="delete-btn" onclick="deleteTask(${task.taskid})" style="background: #ef4444; color: white; padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background 0.2s;">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
     } catch (err) {
         console.error(err);
         listContainer.innerHTML = `<p style='color: #ef4444;'>Sync error: ${err.message}</p>`;
     }
 }
+
+// 4. Update Task Status Checkbox Method
+async function toggleTaskStatus(taskId, statusValue) {
+    const token = localStorage.getItem('userToken');
+    try {
+        const response = await fetch(`${BASE_URL}/tasks/${taskId}`, {
+            method: 'PUT',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isCompleted: statusValue }) 
+        });
+
+        if (response.ok) {
+            loadTasks(token); 
+        }
+    } catch (err) {
+        console.error("Failed updating execution status criteria:", err);
+    }
+}
+
+// --- Forms Event Listeners Handling Matrix ---
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -128,25 +187,21 @@ clearBtn.addEventListener('click', () => {
 document.getElementById('taskForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('userToken');
-    
     const formElement = document.getElementById('taskForm');
     const formData = new FormData(formElement);
 
     try {
         const response = await fetch(`${BASE_URL}/tasks`, {
             method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Authorization': `Bearer ${token}` },
             body: formData 
         });
 
         if (response.ok) {
             formElement.reset();
-            document.getElementById('clearFileBtn').style.display = 'none'; // 🟢 Hide button after save
+            document.getElementById('clearFileBtn').style.display = 'none'; 
             loadTasks(token); 
-}
-        else {
+        } else {
             const data = await response.json();
             alert(`Could not save task: ${data.message || 'Server rejected request'}`);
         }
@@ -179,4 +234,6 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     checkSession();
 });
 
+// Boot Configuration Initializers
+document.addEventListener('DOMContentLoaded', setupFilterListener);
 checkSession();
